@@ -1,0 +1,27 @@
+name: CI/CD Innovatech Backend
+
+on:
+  push:
+    branches: [ "deploy" ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Despliegue en AWS EC2
+        run: |
+          # 1. Movernos a la carpeta del proyecto en el servidor de AWS
+          cd ~/innovatech-chile
+          
+          # 2. Copiar los archivos nuevos que llegaron desde GitHub
+          cp -r ${{ github.workspace }}/* .
+          
+          # 3. Rebuildeae y levantar solo el contenedor del backend
+          # Esto evita tocar la base de datos si ya está corriendo
+          docker compose up -d --build backend
