@@ -3,7 +3,7 @@ name: Deploy Innovatech Backend to AWS
 on:
   push:
     branches:
-      - main
+      - deploy
 
 jobs:
   deploy:
