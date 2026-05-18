@@ -60,10 +60,10 @@ cp .env.example .env
 2. Configuración del archivo .env:
 
 - **PORT**: 3000
-- **DB_HOST**: `localhost` (local) / `db-innovatech` (Docker)
-- **DB_USER**: Usuario de la base de datos MySQL.
-- **DB_PASSWORD**: Contraseña (Gestionada como Secret en AWS).
-- **DB_NAME**: `innovatech_db`
+- **DB_HOST**: localhost
+- **DB_USER**: root
+- **DB_PASSWORD**: tu_password_aqui
+- **DB_NAME**: proyecto_db
 - **DB_PORT**: 3306
 
 ## Ejecución

@@ -1,7 +1,9 @@
 version: '3.8'
+
 services:
   backend:
     build: .
+    image: ${DOCKERHUB_USERNAME}/back-innovatech:latest
     ports:
       - "3000:3000"
     environment:
@@ -9,10 +11,11 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
+      - DB_PORT=3306
     depends_on:
       - db-innovatech
     networks:
-      - innova-network
+      - innovatech-net
 
   db-innovatech:
     image: mysql:8.0
@@ -25,10 +28,10 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - innova-network
+      - innovatech-net
 
 networks:
-  innova-network:
+  innovatech-net:
     driver: bridge
 
 volumes:

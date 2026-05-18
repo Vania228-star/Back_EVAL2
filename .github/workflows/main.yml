@@ -38,15 +38,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/back-innovatech:latest
-            docker stop back-api || true
-            docker rm back-api || true
-            docker run -d \
-              --name back-api \
-              -p 3000:3000 \
-              --restart always \
-              -e DB_HOST=${{ secrets.DB_HOST }} \
-              -e DB_USER=${{ secrets.DB_USER }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e DB_NAME=${{ secrets.DB_NAME }} \
-              ${{ secrets.DOCKERHUB_USERNAME }}/back-innovatech:latest
+            cd /home/ubuntu/app/backend || mkdir -p /home/ubuntu/app/backend && cd /home/ubuntu/app/backend
+            docker compose pull
+            docker compose up -d --build
