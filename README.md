@@ -59,7 +59,7 @@ cp .env.example .env
 
 2. Configuración del archivo .env:
 
-- **PORT**: 3000
+- **PORT**: 8000
 - **DB_HOST**: localhost
 - **DB_USER**: root
 - **DB_PASSWORD**: tu_password_aqui
@@ -119,10 +119,10 @@ Para verificar que el contenedor del Backend responde correctamente desde la ins
 
 ```bash
 # Obtener todos los usuarios
-curl http://localhost:3000/api/usuarios
+curl http://localhost:8000/api/usuarios
 
 # Crear un nuevo usuario
-curl -X POST http://localhost:3000/api/usuarios \
+curl -X POST http://localhost:8000/api/usuarios \
   -H "Content-Type: application/json" \
   -d '{"nombre":"Juan Pérez","email":"juan@example.com","edad":25}'
 ```
@@ -131,7 +131,7 @@ curl -X POST http://localhost:3000/api/usuarios \
 
 ### Para funcionamiento en contenedor:
 
-- **Puerto 3000**: Expuesto para consumo de la API.
+- **Puerto 8000**: Expuesto para consumo de la API.
 
 - **Puerto 3306**: Cerrado al exterior, solo accesible internamente por la red de Docker.
 
@@ -139,13 +139,11 @@ curl -X POST http://localhost:3000/api/usuarios \
 
 ## Pipeline de CI/CD
 
-El flujo automatizado en .github/workflows/main.yml se activa mediante push en la rama deploy:
+El flujo automatizado en `.github/workflows/backend-deploy.yml` se activa mediante push en la rama `deploy` filtrando los cambios de la carpeta `backend/`:
 
-- **Build & Push**: Construye la imagen y la publica en Docker Hub (elegido por su facilidad de integración y gestión de imágenes públicas/privadas).
-
-- **Continuous Deployment**: Se conecta vía SSH a la instancia EC2 para hacer un pull de la nueva imagen y reiniciar los servicios sin intervención manual.
-
-- **Gestión de Secrets**: Se utilizan GitHub Secrets para ocultar las credenciales de AWS y el token del Registry, cumpliendo con los estándares de seguridad de Innovatech Chile.
+- **Self-Hosted Runner en AWS**: GitHub Actions se comunica directamente con el agente runner configurado de forma nativa dentro de la instancia EC2 (`ip-10-0-1-116`), ejecutando los comandos localmente con máxima velocidad.
+- **Continuous Deployment**: El pipeline descarga el código limpio directo al directorio de producción (`~/innovatech-chile`), construye la imagen optimizada con permisos controlados y refresca el servicio de manera automatizada.
+- **Cero tiempo de inactividad para Datos**: Se ejecuta un despliegue selectivo (`docker compose up -d --build backend`), aislando y actualizando el microservicio de la API sin interrumpir ni reiniciar el contenedor de la base de datos MySQL.
 
 ## Principios DevOps Aplicados
 
@@ -158,18 +156,18 @@ El flujo automatizado en .github/workflows/main.yml se activa mediante push en l
 ## Estructura del Proyecto
 ```
 backend/
-├── .github/workflows/main.yml/deploy.yml  # Pipeline de automatización CI/CD
-├── Dockerfile                  # Construcción Multi-stage y Usuario No-Root
-├── docker-compose.yml          # Orquestación de servicios y Volúmenes
-├── server.js          # Punto de entrada de la aplicación
-├── package.json       # Gestión de dependencias y scripts
-├── .env.example       # Plantilla de configuración de entorno
-├── .env              # Variables de entorno (crear manualmente)
-└── README.md         # Documentación técnica del proyecto
+── .github/workflows/backend-deploy.yml  # Pipeline automatizado (Self-Hosted Runner)
+├── Dockerfile                            # Construcción Multi-stage y Usuario seguro No-Root
+├── docker-compose.yml                    # Orquestación de servicios y Volúmenes de persistencia
+├── server.js                             # Punto de entrada de la aplicación Express
+├── package.json                          # Gestión de dependencias y scripts de Node
+├── .env.example                          # Plantilla de configuración de entorno
+├── .env                                  # Variables de entorno locales (Excluido de Git)
+└── README.md                             # Documentación técnica del proyecto
 ```
 
 ## Notas de Operación
 
 - **Persistencia**: La información se almacena en el volumen nombrado db_data. Si el contenedor se detiene, los datos permanecerán seguros.
-- **Producción**: En AWS, asegúrese de que el Security Group permita tráfico entrante al puerto 3000 solo desde la IP/SG del servidor Frontend.
+- **Producción**: En AWS, asegúrese de que el Security Group permita tráfico entrante al puerto **8000** solo desde la IP/SG del servidor Frontend o balanceador de carga.
 - **Automatización**: Toda modificación técnica debe ser enviada a la rama deploy para su reflejo automático en la infraestructura Cloud de Innovatech Chile.

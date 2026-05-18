@@ -7,10 +7,11 @@ FROM node:18-alpine
 WORKDIR /app
 
 RUN addgroup -S nodegroup && adduser -S nodeuser -G nodegroup
+
+COPY --from=builder --chown=nodeuser:nodegroup /app/node_modules ./node_modules
+
+COPY --chown=nodeuser:nodegroup . .
+
 USER nodeuser
-
-COPY --from=builder /app/node_modules ./node_modules
-COPY . .
-
-EXPOSE 3000
+EXPOSE 8000
 CMD ["node", "server.js"]
