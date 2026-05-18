@@ -1,0 +1,34 @@
+name: Deploy Innovatech Backend to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Deploy application via Docker Compose
+        run: |
+          # 1. Movernos a la carpeta del proyecto en el servidor de AWS
+          cd ~/innovatech-chile
+          
+          # 2. Copiar los archivos nuevos que llegaron desde GitHub a la carpeta de ejecución
+          cp -r ${{ github.workspace }}/* .
+          
+          # 3. Detener contenedores anteriores si es que existen, borrar residuos y compilar la nueva versión sin perder el .env
+          docker compose down --remove-orphans
+          docker compose build --no-cache
+          
+          # 4. Levantar los servicios en segundo plano con la nueva versión del código
+          docker compose up -d
+
+      - name: Verify running containers
+        run: |
+          cd ~/innovatech-chile
+          docker compose ps
