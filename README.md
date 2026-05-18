@@ -158,7 +158,7 @@ El flujo automatizado en .github/workflows/main.yml se activa mediante push en l
 ## Estructura del Proyecto
 ```
 backend/
-├── .github/workflows/main.yml  # Pipeline de automatización CI/CD
+├── .github/workflows/main.yml/deploy.yml  # Pipeline de automatización CI/CD
 ├── Dockerfile                  # Construcción Multi-stage y Usuario No-Root
 ├── docker-compose.yml          # Orquestación de servicios y Volúmenes
 ├── server.js          # Punto de entrada de la aplicación
