@@ -1,27 +1,21 @@
-name: CI/CD Innovatech Backend
+name: Deploy Backend & DB Stack
 
 on:
   push:
-    branches: [ "deploy" ]
-    paths:
-      - 'backend/**'
+    branches: [ deploy ]
 
 jobs:
   deploy:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout del código
+      - name: Checkout repository code
         uses: actions/checkout@v4
 
-      - name: Despliegue en AWS EC2
+      - name: Deploy Backend Stack via Docker Compose
         run: |
-          # 1. Movernos a la carpeta del proyecto en el servidor de AWS
           cd ~/innovatech-chile
-          
-          # 2. Copiar los archivos nuevos que llegaron desde GitHub
           cp -r ${{ github.workspace }}/* .
           
-          # 3. Rebuildeae y levantar solo el contenedor del backend
-          # Esto evita tocar la base de datos si ya está corriendo
-          docker compose up -d --build backend
+          # Levanta el microservicio y su base de datos de apoyo de forma aislada
+          docker compose up -d --build db-innovatech backend

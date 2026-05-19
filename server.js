@@ -14,10 +14,10 @@ app.use(express.json());
 
 // Configuración de la conexión a la base de datos MySQL
 const dbConnection = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || 'db-innovatech',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'proyecto_db',
+    database: process.env.DB_NAME || 'innovatech_db',
     port: process.env.DB_PORT || 3306
 });
 
@@ -143,9 +143,9 @@ app.use((err, req, res, next) => {
 });
 
 // Iniciar el servidor
-app.listen(PORT, () => {
-    console.log(`Servidor backend corriendo en el puerto ${PORT}`);
-    console.log(`API disponible en: http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor backend corriendo de forma segura en el puerto ${PORT}`);
+    console.log(`API accesible para la red interna en: http://0.0.0.0:${PORT}`);
 });
 
 // Exportar la app para pruebas
