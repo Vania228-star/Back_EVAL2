@@ -33,6 +33,7 @@ services:
 
 networks:
   innovatech-net:
+    name: backend_innovatech-net
     driver: bridge
 
 volumes:
