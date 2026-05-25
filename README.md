@@ -157,6 +157,7 @@ El flujo automatizado en `.github/workflows/backend-deploy.yml` se activa median
 ```
 backend/
 ── .github/workflows/backend-deploy.yml  # Pipeline automatizado (Self-Hosted Runner)
+├── .gitignore                            # Exclusión de archivos sensibles y node_modules
 ├── Dockerfile                            # Construcción Multi-stage y Usuario seguro No-Root
 ├── docker-compose.yml                    # Orquestación de servicios y Volúmenes de persistencia
 ├── server.js                             # Punto de entrada de la aplicación Express
