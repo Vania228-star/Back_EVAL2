@@ -12,4 +12,4 @@ RUN chown -R innovatech_backend:innovatech_backend /usr/src/app
 USER innovatech_backend
 
 EXPOSE 8000
-CMD ["node", "index.js"]
+CMD ["node", "save", "server.js"]
