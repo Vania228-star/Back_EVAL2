@@ -1,17 +1,15 @@
-FROM node:18-alpine AS builder
-WORKDIR /app
+FROM node:18-slim AS builder
+WORKDIR /usr/src/app
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production
 
-FROM node:18-alpine
-WORKDIR /app
+FROM node:18-slim
+RUN useradd -m innovatech_backend
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY . .
+RUN chown -R innovatech_backend:innovatech_backend /usr/src/app
+USER innovatech_backend
 
-RUN addgroup -S nodegroup && adduser -S nodeuser -G nodegroup
-
-COPY --from=builder --chown=nodeuser:nodegroup /app/node_modules ./node_modules
-
-COPY --chown=nodeuser:nodegroup . .
-
-USER nodeuser
 EXPOSE 8000
-CMD ["node", "server.js"]
+CMD ["node", "index.js"]

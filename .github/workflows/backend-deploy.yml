@@ -1,21 +1,64 @@
-name: Deploy Backend & DB Stack
+name: Deploy Backend to AWS ECS
 
 on:
   push:
     branches: [ deploy ]
 
+env:
+  AWS_REGION: us-east-1
+  ECS_SERVICE: innovatech-service
+  ECS_CLUSTER: innovatech-cluster
+  TASK_DEFINITION_NAME: innovatech-task-def # El nombre que le pusimos en la consola
+
 jobs:
-  deploy:
-    runs-on: self-hosted
+  build-and-push-aws:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository code
+      - name: Descargar codigo del repo
         uses: actions/checkout@v4
 
-      - name: Deploy Backend Stack via Docker Compose
+      # 1. Autenticación (IE5)
+      - name: Configurar credenciales de aws
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # 2. Login en la bodega
+      - name: Iniciar sesion en aws ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 3. Construir y Publicar (Igual al profesor)
+      - name: construir y Publicar en aws
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/innovatech-back:latest
+
+      # 4. ¡EL TRUCO! Descarga el plano directamente desde AWS en vivo
+      - name: Descargar Task Definition desde AWS
         run: |
-          cd ~/innovatech-chile
-          cp -r ${{ github.workspace }}/* .
-          
-          # Levanta el microservicio y su base de datos de apoyo de forma aislada
-          docker compose up -d --build db-innovatech backend
+          aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION_NAME }} --query taskDefinition > task-definition.json
+
+      # 5. Actualiza el plano con la nueva imagen que acabamos de compilar
+      - name: Actualizar ID de imagen en la Task Definition de ECS
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: backend
+          image: ${{ steps.login-ecr.outputs.registry }}/innovatech-back:latest
+
+      # 6. Despliega de forma atómica en el servicio Fargate (IE2 / IE7)
+      - name: Desplegar en Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
