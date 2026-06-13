@@ -131,6 +131,22 @@ app.delete('/api/usuarios/:id', (req, res) => {
     });
 });
 
+app.get('/api/init', (req, res) => {
+    const sql = `CREATE TABLE IF NOT EXISTS usuarios (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(255),
+        email VARCHAR(255),
+        edad INT
+    )`;
+    dbConnection.query(sql, (err) => {
+        if (err) {
+            console.error('Error creando la tabla:', err);
+            return res.status(500).json({ error: "No pude crear la tabla" });
+        }
+        res.json({ message: "Tabla creada correctamente" });
+    });
+});
+
 // Manejo de rutas no encontradas
 app.use('*', (req, res) => {
     res.status(404).json({ error: 'Ruta no encontrada' });
